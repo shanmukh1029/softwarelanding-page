@@ -1,0 +1,772 @@
+<html class="light" lang="en" style="scroll-behavior: smooth;"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Software Studio - Dynamic Code Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0448ae",
+                        "background-light": "#ffffff",
+                        "background-dark": "#0f1723",
+                        "graphite": "#1A1A1A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0rem",
+                        "lg": "0rem",
+                        "xl": "0.125rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Space Grotesk', sans-serif;
+                cursor: crosshair;
+            }
+        }
+        .kerning-tight {
+            letter-spacing: -0.05em;
+        }
+        .architectural-line {
+            height: 1px;
+            background: rgba(26, 26, 26, 0.1);
+            width: 100%;
+        }
+        .vertical-line {
+            width: 1px;
+            background: rgba(26, 26, 26, 0.1);
+            height: 100%;
+        }
+        .gallery-viewport {
+            height: 300vh;
+            position: relative;
+            view-timeline-name: --gallery-scroll;
+            view-timeline-axis: block;
+        }
+        .gallery-sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .gallery-card {
+            position: absolute;
+            width: 300px;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            transition: box-shadow 0.3s ease, z-index 0s;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 4px;
+        }
+        .gallery-card-1 {
+            z-index: 3;
+            animation: morphCard1 linear both;
+            animation-timeline: --gallery-scroll;
+            animation-range: cover 0% cover 100%;
+        }
+        .gallery-card-2 {
+            z-index: 2;
+            animation: morphCard2 linear both;
+            animation-timeline: --gallery-scroll;
+            animation-range: cover 0% cover 100%;
+        }
+        .gallery-card-3 {
+            z-index: 1;
+            animation: morphCard3 linear both;
+            animation-timeline: --gallery-scroll;
+            animation-range: cover 0% cover 100%;
+        }
+        @keyframes morphCard1 {
+            0% {
+                transform: translate(-50%, -50%);
+                border-radius: 4px;
+                width: 300px;
+                height: 400px; 
+            }
+            100% {
+                transform: translate(calc(-50% - 380px), -50%);
+                border-radius: 50%;
+                width: 350px;
+                height: 350px;
+            }
+        }
+        @keyframes morphCard2 {
+            0% {
+                transform: translate(-50%, -50%);
+                border-radius: 4px;
+                width: 300px;
+                height: 400px;
+            }
+            100% {
+                transform: translate(-50%, -50%);
+                border-radius: 50%;
+                width: 350px;
+                height: 350px;
+            }
+        }
+        @keyframes morphCard3 {
+            0% {
+                transform: translate(-50%, -50%);
+                border-radius: 4px;
+                width: 300px;
+                height: 400px;
+            }
+            100% {
+                transform: translate(calc(-50% + 380px), -50%);
+                border-radius: 50%;
+                width: 350px;
+                height: 350px;
+            }
+        }
+        .gallery-card:hover {
+            z-index: 50 !important;
+        }
+        .gallery-tooltip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 60;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(4px);
+            padding: 1rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+        .gallery-card:hover .gallery-tooltip {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            animation: marquee 80s linear infinite;
+        }
+        .mask-linear-fade {
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        @keyframes progress {
+            to { stroke-dashoffset: 0; }
+        }
+        .progress-ring {
+            stroke-dasharray: 138;
+            stroke-dashoffset: 138;
+            animation: progress linear;
+            animation-timeline: scroll();
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-graphite dark:text-white antialiased overflow-x-hidden" id="top">
+<nav class="fixed top-0 left-0 w-full z-50 border-b border-graphite/5 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-[1440px] mx-auto flex items-center justify-between px-8 py-6">
+<div class="flex items-center gap-2">
+<div class="size-6 bg-graphite dark:bg-white flex items-center justify-center">
+<span class="text-white dark:text-graphite text-[10px] font-bold">S</span>
+</div>
+<h2 class="text-lg font-bold kerning-tight tracking-tighter uppercase">Studio.v1</h2>
+</div>
+<div class="hidden md:flex items-center gap-12">
+<a class="text-xs font-medium uppercase tracking-widest hover:text-primary transition-colors" href="#">Work</a>
+<a class="text-xs font-medium uppercase tracking-widest hover:text-primary transition-colors" href="#">Philosophy</a>
+<a class="text-xs font-medium uppercase tracking-widest hover:text-primary transition-colors" href="#">Stack</a>
+<a class="text-xs font-medium uppercase tracking-widest hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+<button class="bg-primary text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-black transition-all">
+            Start Project
+        </button>
+</div>
+</nav>
+<main>
+<section class="relative h-screen flex items-center justify-center overflow-hidden border-b border-graphite/5 pt-20">
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+<div class="absolute left-1/4 h-full vertical-line"></div>
+<div class="absolute left-1/2 h-full vertical-line"></div>
+<div class="absolute left-3/4 h-full vertical-line"></div>
+<div class="absolute top-1/4 w-full architectural-line"></div>
+<div class="absolute top-3/4 w-full architectural-line"></div>
+</div>
+<div class="relative z-10 text-center px-4 max-w-7xl mx-auto">
+<p class="text-primary text-xs font-bold uppercase tracking-[0.4em] mb-8">Swiss Engineering / Pure Logic</p>
+<h1 class="text-[clamp(3rem,12vw,10rem)] leading-[0.85] font-bold kerning-tight uppercase mb-12 select-none">
+                Engineering <br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-b from-graphite to-graphite/20 dark:from-white dark:to-white/10">The Intangible</span>
+</h1>
+<div class="flex flex-col md:flex-row items-center justify-center gap-12 mt-16">
+<p class="max-w-xs text-sm text-graphite/60 dark:text-white/60 leading-relaxed text-left border-l border-primary pl-6 uppercase tracking-wider">
+                    Award-winning software design for the modern enterprise, where precision is the only metric that matters.
+                </p>
+<button class="group flex items-center gap-4 border border-graphite/10 dark:border-white/10 px-8 py-5 hover:bg-graphite hover:text-white dark:hover:bg-white dark:hover:text-graphite transition-all">
+<span class="text-xs font-bold uppercase tracking-widest">Explore Selected Works</span>
+<span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
+<span class="text-[10px] font-bold uppercase tracking-[0.3em] opacity-40">Scroll</span>
+<div class="w-[1px] h-12 bg-graphite/20 dark:bg-white/20 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1/2 bg-primary"></div>
+</div>
+</div>
+</section>
+<section class="py-32 px-8 max-w-[1440px] mx-auto border-x border-graphite/5">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+<div class="md:col-span-4">
+<h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6">01 // Competencies</h3>
+<h2 class="text-4xl font-bold kerning-tight leading-tight uppercase">Architectural <br/> Integrity</h2>
+</div>
+<div class="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-16 border-l border-graphite/5 pl-12">
+<div class="flex flex-col gap-6">
+<span class="text-[10px] font-bold opacity-30 tracking-widest uppercase">Cloud Systems</span>
+<p class="text-lg text-graphite/80 dark:text-white/80 leading-relaxed">
+                        Scalable, resilient systems designed for the future of the web. We build the skeleton that supports massive scale.
+                    </p>
+</div>
+<div class="flex flex-col gap-6">
+<span class="text-[10px] font-bold opacity-30 tracking-widest uppercase">UX Engineering</span>
+<p class="text-lg text-graphite/80 dark:text-white/80 leading-relaxed">
+                        User-centric interfaces rooted in Swiss design principles. Beauty as a byproduct of perfect functionality.
+                    </p>
+</div>
+<div class="flex flex-col gap-6">
+<span class="text-[10px] font-bold opacity-30 tracking-widest uppercase">AI Integration</span>
+<p class="text-lg text-graphite/80 dark:text-white/80 leading-relaxed">
+                        Seamless integration of advanced machine learning models into existing enterprise workflows.
+                    </p>
+</div>
+<div class="flex flex-col gap-6">
+<span class="text-[10px] font-bold opacity-30 tracking-widest uppercase">Neural Design</span>
+<p class="text-lg text-graphite/80 dark:text-white/80 leading-relaxed">
+                        Interpreting data as a visual language. Transforming complex metrics into actionable insights.
+                    </p>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-graphite text-white py-32 overflow-hidden">
+<div class="px-8 mb-24 max-w-[1440px] mx-auto flex items-end justify-between">
+<div>
+<h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6">02 // Selected Works</h3>
+<h2 class="text-6xl font-bold kerning-tight uppercase">Recent <br/> Engagements</h2>
+</div>
+<div class="hidden md:block text-right">
+<p class="text-sm font-light opacity-50 uppercase tracking-widest">Sorted by Impact // 2024</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-white/10">
+<div class="group relative aspect-[4/3] overflow-hidden bg-graphite">
+<div class="absolute inset-0 opacity-60 group-hover:opacity-100 transition-opacity duration-700">
+<img alt="System Architecture" class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4aEx6ElgPREKX6mJ42yv3lHQ73PKuqTOt7LKLcE-9h3bs1g1lJsiCBURsLWyxET-8qRNDjTlnh-stKIYNIMJEW8hK1fCQvlGbVRWUeasaMAGYEZ0rh-_ifE7jsMbAyg44JLkEwuZC4OmmuKk7YMUZQecvgyN5XVG8Ie-73GISieMR98d0cJpwl_LFwYTI3NIoK1Qysp4zwFDmSmzmNj8VOjd4vtZRDUsqT5tKH5qvT3P_lp4Zd4MfwfQQpmGCOfBFyQvf81frHgXh"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-graphite via-transparent to-transparent"></div>
+<div class="absolute bottom-12 left-12">
+<span class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2 block">System Architecture</span>
+<h4 class="text-2xl font-bold uppercase tracking-tight">Project 01 // Nexus Core</h4>
+</div>
+<div class="absolute top-12 right-12 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-4xl">north_east</span>
+</div>
+</div>
+<div class="group relative aspect-[4/3] overflow-hidden bg-graphite">
+<div class="absolute inset-0 opacity-60 group-hover:opacity-100 transition-opacity duration-700">
+<img alt="Neural Interface" class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkjEdJgKElyiS3gdzE8pE1OQ82uqLmyDBUj5MBjWkSxURVzyMmjeCLippPjCunkkWbBQtRo0XRF_F3iciL3ylY40rIVpQXbmx822IeExMbJkO-7zxmPfwNt8_kGt-twq2GjDSbhUpE2MH_0k42VX_DV_FsPQR7J9J4CvDO92EbxcbdubnJROuNW_Ho3kD_fOxHY704Y-XKfIAQOQraKNTR_KgUrUW5Y7AdN9Ptkf8ImdQIQtIFHdisZ5AET5CkXQZA-yGrebVEDQ6n"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-graphite via-transparent to-transparent"></div>
+<div class="absolute bottom-12 left-12">
+<span class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2 block">AI Interface</span>
+<h4 class="text-2xl font-bold uppercase tracking-tight">Project 02 // Neural Flow</h4>
+</div>
+<div class="absolute top-12 right-12 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-4xl">north_east</span>
+</div>
+</div>
+</div>
+</section>
+<section class="gallery-viewport bg-white dark:bg-background-dark border-b border-graphite/5 relative">
+<div class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
+<div class="w-full h-full flex flex-col justify-between text-graphite dark:text-white">
+<div class="relative pt-20 pl-8 opacity-[0.04] dark:opacity-[0.07]">
+<h2 class="text-[18vw] leading-[0.75] font-bold uppercase tracking-tighter">System</h2>
+<div class="flex gap-12 mt-4 ml-2 font-mono text-sm tracking-widest">
+<span>IDX: 001</span>
+<span>GRID: A7</span>
+</div>
+</div>
+<div class="relative w-full flex-1 overflow-hidden opacity-[0.1] dark:opacity-[0.2] my-8">
+</div>
+<div class="relative pb-20 pr-8 text-right opacity-[0.04] dark:opacity-[0.07]">
+<h2 class="text-[18vw] leading-[0.75] font-bold uppercase tracking-tighter">Logic</h2>
+<div class="flex justify-end gap-12 mt-4 mr-2 font-mono text-sm tracking-widest">
+<span>SEC: 03</span>
+<span>VER: 2.0</span>
+</div>
+</div>
+</div>
+</div>
+<div class="gallery-sticky-container relative z-10">
+<div class="absolute inset-0 z-0 opacity-5 pointer-events-none">
+<div class="absolute left-1/2 h-full vertical-line"></div>
+<div class="absolute top-1/2 w-full architectural-line"></div>
+</div>
+<div class="absolute top-0 left-0 w-full px-8 pt-12 z-20 pointer-events-none">
+<div class="max-w-[1440px] mx-auto flex justify-between items-start">
+<div class="max-w-xl pointer-events-auto">
+<h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6">03 // Immersive Gallery</h3>
+<h2 class="text-5xl font-bold kerning-tight uppercase leading-[0.9]">Morphing<br/>Stack</h2>
+</div>
+<div class="mt-8 md:mt-0 pointer-events-auto">
+<p class="text-[10px] font-bold opacity-40 uppercase tracking-[0.4em] text-right">Scroll to Morph // Hover to Inspect</p>
+</div>
+</div>
+</div>
+<div class="relative w-full h-full flex items-center justify-center perspective-1000">
+<div class="absolute bottom-[12vh] left-1/2 transform -translate-x-1/2 z-0 flex flex-col items-center justify-center pointer-events-none">
+<div class="text-[6rem] leading-[0.8] font-bold text-graphite/10 dark:text-white/10 tracking-tighter tabular-nums font-display select-none">
+                        08 <span class="text-3xl align-top opacity-50 mx-2">/</span> 24
+                    </div>
+<div class="mt-2 text-primary text-[10px] font-bold uppercase tracking-[0.4em]">Project Index</div>
+</div>
+<div class="gallery-card gallery-card-1 peer/card1 overflow-hidden border border-graphite/10 dark:border-white/10">
+<img alt="Architectural Render 1" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4aEx6ElgPREKX6mJ42yv3lHQ73PKuqTOt7LKLcE-9h3bs1g1lJsiCBURsLWyxET-8qRNDjTlnh-stKIYNIMJEW8hK1fCQvlGbVRWUeasaMAGYEZ0rh-_ifE7jsMbAyg44JLkEwuZC4OmmuKk7YMUZQecvgyN5XVG8Ie-73GISieMR98d0cJpwl_LFwYTI3NIoK1Qysp4zwFDmSmzmNj8VOjd4vtZRDUsqT5tKH5qvT3P_lp4Zd4MfwfQQpmGCOfBFyQvf81frHgXh"/>
+<div class="gallery-tooltip">
+<span class="text-[10px] font-bold uppercase tracking-widest block text-primary mb-1">Architecture</span>
+<p class="text-xs font-bold uppercase tracking-wider text-white">Project Alpha // System</p>
+</div>
+</div>
+<div class="gallery-card gallery-card-2 peer/card2 overflow-hidden border border-graphite/10 dark:border-white/10">
+<img alt="Architectural Render 2" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkjEdJgKElyiS3gdzE8pE1OQ82uqLmyDBUj5MBjWkSxURVzyMmjeCLippPjCunkkWbBQtRo0XRF_F3iciL3ylY40rIVpQXbmx822IeExMbJkO-7zxmPfwNt8_kGt-twq2GjDSbhUpE2MH_0k42VX_DV_FsPQR7J9J4CvDO92EbxcbdubnJROuNW_Ho3kD_fOxHY704Y-XKfIAQOQraKNTR_KgUrUW5Y7AdN9Ptkf8ImdQIQtIFHdisZ5AET5CkXQZA-yGrebVEDQ6n"/>
+<div class="gallery-tooltip">
+<span class="text-[10px] font-bold uppercase tracking-widest block text-primary mb-1">Logic Flow</span>
+<p class="text-xs font-bold uppercase tracking-wider text-white">Project Beta // Neural</p>
+</div>
+</div>
+<div class="gallery-card gallery-card-3 peer/card3 overflow-hidden border border-graphite/10 dark:border-white/10">
+<img alt="Architectural Render 3" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4aEx6ElgPREKX6mJ42yv3lHQ73PKuqTOt7LKLcE-9h3bs1g1lJsiCBURsLWyxET-8qRNDjTlnh-stKIYNIMJEW8hK1fCQvlGbVRWUeasaMAGYEZ0rh-_ifE7jsMbAyg44JLkEwuZC4OmmuKk7YMUZQecvgyN5XVG8Ie-73GISieMR98d0cJpwl_LFwYTI3NIoK1Qysp4zwFDmSmzmNj8VOjd4vtZRDUsqT5tKH5qvT3P_lp4Zd4MfwfQQpmGCOfBFyQvf81frHgXh"/>
+<div class="gallery-tooltip">
+<span class="text-[10px] font-bold uppercase tracking-widest block text-primary mb-1">Structure</span>
+<p class="text-xs font-bold uppercase tracking-wider text-white">Project Gamma // Core</p>
+</div>
+</div>
+<div class="absolute inset-0 pointer-events-none -z-10 overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 w-full h-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-[2px] opacity-0 peer-hover/card1:opacity-100 transition-opacity duration-700 ease-out flex items-center justify-center">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-7xl px-8 text-xs font-mono text-primary/40 leading-loose">
+<div class="flex flex-col gap-4">
+<p>// Nexus Core System Initialization</p>
+<p>class NexusKernel extends System {</p>
+<p class="pl-4">private readonly _memory: SharedBuffer;</p>
+<p class="pl-4">constructor(config: SysConfig) {</p>
+<p class="pl-8">super(config);</p>
+<p class="pl-8">this.bridge = new Bridge(config.port);</p>
+<p class="pl-8">this.mount_fs('/dev/null');</p>
+<p class="pl-4">}</p>
+<p class="pl-4">public async sync(): Promise&lt;void&gt; {</p>
+<p class="pl-8">await this.kernel.flush();</p>
+<p class="pl-8">return 0x1A4;</p>
+<p class="pl-4">}</p>
+<p>}</p>
+</div>
+<div class="hidden md:flex flex-col gap-4 text-graphite/20 dark:text-white/20">
+<p>// MEMORY DUMP: 0x8F</p>
+<p>01001010 11010101 00101010 11110000</p>
+<p>11100010 10101010 11110000 00011011</p>
+<p>00011011 00101101 10101011 11010101</p>
+<br/>
+<p>process.stdout.write("System OK");</p>
+<p>alloc_pages(4096); // Reserved</p>
+</div>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-[2px] opacity-0 peer-hover/card2:opacity-100 transition-opacity duration-700 ease-out flex items-center justify-center">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-7xl px-8 text-xs font-mono text-graphite/40 dark:text-white/40 leading-loose">
+<div class="flex flex-col gap-4">
+<p>import torch.nn as nn</p>
+<p>import torch.functional as F</p>
+<br/>
+<p>class TransformerBlock(nn.Module):</p>
+<p class="pl-4">def __init__(self, embed_dim, heads):</p>
+<p class="pl-8">super().__init__()</p>
+<p class="pl-8">self.att = nn.MultiheadAttention(embed_dim, heads)</p>
+<p class="pl-8">self.ffn = nn.Sequential(</p>
+<p class="pl-12">nn.Linear(embed_dim, 4 * embed_dim),</p>
+<p class="pl-12">nn.GELU(),</p>
+<p class="pl-12">nn.Linear(4 * embed_dim, embed_dim)</p>
+<p class="pl-8">)</p>
+</div>
+<div class="hidden md:flex flex-col gap-4 text-primary/30">
+<p># Shader Compilation</p>
+<p>void main() {</p>
+<p class="pl-4">vec2 uv = gl_FragCoord.xy / resolution.xy;</p>
+<p class="pl-4">vec3 color = texture(iChannel0, uv).rgb;</p>
+<p class="pl-4">float noise = fract(sin(dot(uv, vec2(12.9, 78.2)))*43758.5);</p>
+<p class="pl-4">gl_FragColor = vec4(color * noise, 1.0);</p>
+<p>}</p>
+<br/>
+<p>&gt; Training loss: 0.00241</p>
+<p>&gt; Epoch: 94/100</p>
+</div>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-[2px] opacity-0 peer-hover/card3:opacity-100 transition-opacity duration-700 ease-out flex items-center justify-center">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-7xl px-8 text-xs font-mono text-graphite/40 dark:text-white/40 leading-loose">
+<div class="flex flex-col gap-4">
+<p>interface IStructuralEntity {</p>
+<p class="pl-4">readonly id: UUID;</p>
+<p class="pl-4">position: Vector3;</p>
+<p class="pl-4">rotation: Quaternion;</p>
+<p class="pl-4">physicsBody?: RigidBody;</p>
+<p>}</p>
+<br/>
+<p>function calculateLoad(nodes: Node[]): number {</p>
+<p class="pl-4">return nodes.reduce((acc, node) =&gt; {</p>
+<p class="pl-8">return acc + node.stress_tensor.magnitude();</p>
+<p class="pl-4">}, 0);</p>
+<p>}</p>
+</div>
+<div class="hidden md:flex flex-col gap-4 text-primary/30">
+<p>// GEOMETRY PIPELINE</p>
+<p>const geometry = new BufferGeometry();</p>
+<p>const vertices = new Float32Array([</p>
+<p class="pl-4">-1.0, -1.0,  1.0,</p>
+<p class="pl-4"> 1.0, -1.0,  1.0,</p>
+<p class="pl-4"> 1.0,  1.0,  1.0,</p>
+                                ]);
+                                <br/>
+<p>geometry.setAttribute('position', vertices);</p>
+<p>scene.add(new Mesh(geometry, material));</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-48 px-8 bg-background-light dark:bg-background-dark">
+<div class="max-w-4xl mx-auto text-center">
+<h3 class="text-xs font-bold text-primary uppercase tracking-[0.4em] mb-16">The Philosophy</h3>
+<p class="text-4xl md:text-6xl font-bold leading-[1.1] kerning-tight uppercase tracking-tighter mb-16">
+                We believe in software that feels <span class="text-primary italic">permanent</span>. No trends, no noise—just pure, high-performance logic wrapped in minimalist structural design.
+            </p>
+<div class="h-16 w-[1px] bg-primary mx-auto"></div>
+</div>
+</section>
+<section class="border-t border-b border-graphite/5 py-24 px-8">
+<div class="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
+<div>
+<span class="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-4 block">Engineered Solutions</span>
+<h5 class="text-5xl font-bold">142<span class="text-primary text-xl">+</span></h5>
+</div>
+<div>
+<span class="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-4 block">Awards Received</span>
+<h5 class="text-5xl font-bold">24<span class="text-primary text-xl">/Y</span></h5>
+</div>
+<div>
+<span class="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-4 block">Uptime Reliability</span>
+<h5 class="text-5xl font-bold">99<span class="text-primary text-xl">.9</span></h5>
+</div>
+<div>
+<span class="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-4 block">Line Coverage</span>
+<h5 class="text-5xl font-bold">100<span class="text-primary text-xl">%</span></h5>
+</div>
+</div>
+</section>
+<section class="py-24 px-8 max-w-[1440px] mx-auto border-b border-graphite/5 overflow-hidden">
+<div class="mb-12">
+<h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6">03.5 // Strategic Partners</h3>
+</div>
+<div class="relative w-full mask-linear-fade">
+<div class="flex overflow-hidden">
+<div class="flex animate-marquee gap-24 items-center w-max pr-24">
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-8 w-auto fill-current" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Apple</span>
+</div>
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-8 w-auto fill-current" viewBox="0 0 488 512" xmlns="http://www.w3.org/2000/svg"><path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Google</span>
+</div>
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-8 w-auto fill-current" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zM128 408c-13.3 0-24-10.7-24-24V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24zm64-24V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24zm64 0V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24zm64 0V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Stripe</span>
+</div>
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-6 w-auto fill-current" viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4 142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1 3.3-7.9 3.3-16.7 0-24.6-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Tesla</span>
+</div>
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-8 w-auto fill-current" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Apple</span>
+</div>
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-8 w-auto fill-current" viewBox="0 0 488 512" xmlns="http://www.w3.org/2000/svg"><path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Google</span>
+</div>
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-8 w-auto fill-current" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zM128 408c-13.3 0-24-10.7-24-24V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24zm64-24V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24zm64 0V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24zm64 0V128c0-13.3 10.7-24 24-24s24 10.7 24 24v256c0 13.3-10.7 24-24 24z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Stripe</span>
+</div>
+<div class="flex-shrink-0 opacity-20 transition-opacity duration-300 grayscale flex items-center gap-3">
+<svg class="h-6 w-auto fill-current" viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4 142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1 3.3-7.9 3.3-16.7 0-24.6-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"></path></svg>
+<span class="text-lg font-bold tracking-tight uppercase">Tesla</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-32 px-8 max-w-[1440px] mx-auto">
+<div class="mb-24">
+<h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6">04 // Investment</h3>
+<h2 class="text-6xl font-bold kerning-tight uppercase">Engagement <br/> Models</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+<div class="group relative p-10 border border-graphite/5 bg-gradient-to-br from-[#fcfcfc] to-[#f1f1f1] dark:from-[#1a1a1a] dark:to-[#111111] transition-all duration-500 hover:shadow-2xl">
+<div class="mb-8">
+<h4 class="text-xl font-bold uppercase tracking-widest mb-2">Pilot</h4>
+<p class="text-[10px] font-bold opacity-40 uppercase tracking-widest">Proof of Concept</p>
+</div>
+<div class="mb-12">
+<span class="text-4xl font-bold tracking-tight">€25k</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest ml-2">/ Sprint</span>
+</div>
+<ul class="flex flex-col gap-4 mb-12">
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider opacity-80">
+<span class="w-1 h-1 bg-primary"></span> Rapid Prototyping
+                    </li>
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider opacity-80">
+<span class="w-1 h-1 bg-primary"></span> UX Architecture
+                    </li>
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider opacity-80">
+<span class="w-1 h-1 bg-primary"></span> Tech Feasibility
+                    </li>
+</ul>
+<button class="w-full border border-graphite/10 dark:border-white/10 py-4 text-xs font-bold uppercase tracking-[0.2em] group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
+                    Start Project
+                </button>
+</div>
+<div class="group relative p-10 border border-transparent bg-gradient-to-br from-[#0f1723] to-[#050911] text-white shadow-2xl md:-translate-y-6">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary to-transparent"></div>
+<div class="mb-8">
+<h4 class="text-xl font-bold uppercase tracking-widest mb-2">Scale</h4>
+<p class="text-[10px] font-bold opacity-60 uppercase tracking-widest">Product Acceleration</p>
+</div>
+<div class="mb-12">
+<span class="text-4xl font-bold tracking-tight">€85k</span>
+<span class="text-xs font-bold opacity-60 uppercase tracking-widest ml-2">/ Quarter</span>
+</div>
+<ul class="flex flex-col gap-4 mb-12 text-white/90">
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider">
+<span class="w-1 h-1 bg-primary"></span> Full Stack Team
+                    </li>
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider">
+<span class="w-1 h-1 bg-primary"></span> System Design
+                    </li>
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider">
+<span class="w-1 h-1 bg-primary"></span> AI Integration
+                    </li>
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider">
+<span class="w-1 h-1 bg-primary"></span> Cloud Infra
+                    </li>
+</ul>
+<button class="w-full bg-white text-graphite py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-primary hover:text-white hover:border-transparent transition-all">
+                    Start Project
+                </button>
+</div>
+<div class="group relative p-10 border border-graphite/5 bg-gradient-to-br from-[#fcfcfc] to-[#f1f1f1] dark:from-[#1a1a1a] dark:to-[#111111] transition-all duration-500 hover:shadow-2xl">
+<div class="mb-8">
+<h4 class="text-xl font-bold uppercase tracking-widest mb-2">Enterprise</h4>
+<p class="text-[10px] font-bold opacity-40 uppercase tracking-widest">Global Systems</p>
+</div>
+<div class="mb-12">
+<span class="text-4xl font-bold tracking-tight">Custom</span>
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest ml-2">/ Annual</span>
+</div>
+<ul class="flex flex-col gap-4 mb-12">
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider opacity-80">
+<span class="w-1 h-1 bg-primary"></span> Dedicated Squads
+                    </li>
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider opacity-80">
+<span class="w-1 h-1 bg-primary"></span> 24/7 SLA
+                    </li>
+<li class="flex items-center gap-3 text-xs font-bold uppercase tracking-wider opacity-80">
+<span class="w-1 h-1 bg-primary"></span> Legacy Migration
+                    </li>
+</ul>
+<button class="w-full border border-graphite/10 dark:border-white/10 py-4 text-xs font-bold uppercase tracking-[0.2em] group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
+                    Start Project
+                </button>
+</div>
+</div>
+</section>
+<section class="py-32 px-8 max-w-[1440px] mx-auto border-t border-graphite/5 bg-background-light dark:bg-background-dark">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
+<div class="lg:col-span-6 flex flex-col justify-between">
+<div>
+<h3 class="text-xs font-bold text-primary uppercase tracking-[0.3em] mb-6">05 // Contact</h3>
+<h2 class="text-[clamp(3rem,8vw,7rem)] leading-[0.85] font-bold kerning-tight uppercase mb-8 lg:mb-0">
+                        Let’s <br/>
+                        Build <br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-b from-graphite to-graphite/20 dark:from-white dark:to-white/10">The Future</span>
+</h2>
+</div>
+<div class="hidden lg:flex flex-col gap-10">
+<p class="text-sm font-medium text-graphite/60 dark:text-white/60 leading-relaxed uppercase tracking-widest max-w-sm">
+                        Ready to initiate the next phase? <br/>
+                        Our engineers are standing by.
+                    </p>
+<div>
+<span class="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-4 block">Quick Contact</span>
+<div class="flex items-center gap-8 font-mono text-xs text-graphite dark:text-white">
+<a class="group relative py-1" href="mailto:hello@studio.v1">
+                                EMAIL US: HELLO@STUDIO.V1
+                                <span class="absolute bottom-0 left-0 w-full h-[1px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+</a>
+<a class="group relative py-1" href="#">
+                                CONNECT: LINKEDIN
+                                <span class="absolute bottom-0 left-0 w-full h-[1px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-6 flex flex-col justify-center">
+<form class="space-y-12">
+<div class="group relative">
+<input class="peer w-full bg-transparent border-b border-graphite/20 dark:border-white/20 py-4 text-xl md:text-2xl font-medium text-graphite dark:text-white placeholder-transparent focus:outline-none focus:border-primary transition-colors duration-300" id="name" placeholder="Name" type="text"/>
+<label class="absolute left-0 -top-3.5 text-xs font-bold uppercase tracking-widest text-graphite/40 dark:text-white/40 peer-placeholder-shown:text-xl peer-placeholder-shown:top-4 peer-placeholder-shown:text-graphite/20 peer-placeholder-shown:dark:text-white/20 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-primary transition-all duration-300 pointer-events-none" for="name">
+                            Name
+                        </label>
+</div>
+<div class="group relative">
+<input class="peer w-full bg-transparent border-b border-graphite/20 dark:border-white/20 py-4 text-xl md:text-2xl font-medium text-graphite dark:text-white placeholder-transparent focus:outline-none focus:border-primary transition-colors duration-300" id="company" placeholder="Company" type="text"/>
+<label class="absolute left-0 -top-3.5 text-xs font-bold uppercase tracking-widest text-graphite/40 dark:text-white/40 peer-placeholder-shown:text-xl peer-placeholder-shown:top-4 peer-placeholder-shown:text-graphite/20 peer-placeholder-shown:dark:text-white/20 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-primary transition-all duration-300 pointer-events-none" for="company">
+                            Company
+                        </label>
+</div>
+<div class="group relative">
+<input class="peer w-full bg-transparent border-b border-graphite/20 dark:border-white/20 py-4 text-xl md:text-2xl font-medium text-graphite dark:text-white placeholder-transparent focus:outline-none focus:border-primary transition-colors duration-300" id="email" placeholder="Email" type="email"/>
+<label class="absolute left-0 -top-3.5 text-xs font-bold uppercase tracking-widest text-graphite/40 dark:text-white/40 peer-placeholder-shown:text-xl peer-placeholder-shown:top-4 peer-placeholder-shown:text-graphite/20 peer-placeholder-shown:dark:text-white/20 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-primary transition-all duration-300 pointer-events-none" for="email">
+                            Email
+                        </label>
+</div>
+<div class="group relative">
+<textarea class="peer w-full bg-transparent border-b border-graphite/20 dark:border-white/20 py-4 text-xl md:text-2xl font-medium text-graphite dark:text-white placeholder-transparent focus:outline-none focus:border-primary transition-colors duration-300 resize-none" id="brief" placeholder="Project Brief" rows="1"></textarea>
+<label class="absolute left-0 -top-3.5 text-xs font-bold uppercase tracking-widest text-graphite/40 dark:text-white/40 peer-placeholder-shown:text-xl peer-placeholder-shown:top-4 peer-placeholder-shown:text-graphite/20 peer-placeholder-shown:dark:text-white/20 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-primary transition-all duration-300 pointer-events-none" for="brief">
+                            Project Brief
+                        </label>
+</div>
+<div class="pt-8">
+<button class="w-full bg-primary text-white py-6 text-xs font-bold uppercase tracking-[0.2em] hover:bg-black dark:hover:bg-white dark:hover:text-graphite transition-all duration-300 flex items-center justify-between px-8 group">
+<span>Send Inquiry</span>
+<span class="material-symbols-outlined text-lg group-hover:translate-x-2 transition-transform duration-300">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</section>
+<section class="border-t border-graphite/5 bg-background-light dark:bg-background-dark">
+<div class="block w-full py-48 lg:py-64">
+<div class="relative z-10 w-full text-center px-4">
+<p class="text-xs font-bold uppercase tracking-[0.4em] text-primary mb-12">
+                    Direct Line // Priority
+                </p>
+<div class="relative inline-block">
+<h2 class="text-[clamp(2rem,5.5vw,7rem)] leading-[0.8] font-bold uppercase tracking-tighter text-graphite dark:text-white select-none">
+                        Hello@Studio.v1
+                    </h2>
+</div>
+</div>
+</div>
+</section>
+<footer class="bg-white dark:bg-background-dark py-24 px-8 border-t border-graphite/10">
+<div class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-24">
+<div class="md:col-span-5">
+<div class="flex items-center gap-2 mb-8">
+<div class="size-8 bg-primary flex items-center justify-center">
+<span class="text-white text-xs font-bold tracking-widest">S</span>
+</div>
+<h2 class="text-xl font-bold kerning-tight uppercase tracking-tighter">Studio Engineering</h2>
+</div>
+<p class="text-sm font-medium text-graphite/60 dark:text-white/60 leading-relaxed uppercase tracking-widest mb-12 max-w-sm">
+                    Defining the intersection of technical excellence and minimalist aesthetic since 2012.
+                </p>
+<div class="flex gap-6">
+<a class="size-10 border border-graphite/10 dark:border-white/10 flex items-center justify-center hover:bg-primary hover:text-white transition-all" href="#">
+<span class="text-[10px] font-bold">TW</span>
+</a>
+<a class="size-10 border border-graphite/10 dark:border-white/10 flex items-center justify-center hover:bg-primary hover:text-white transition-all" href="#">
+<span class="text-[10px] font-bold">LI</span>
+</a>
+<a class="size-10 border border-graphite/10 dark:border-white/10 flex items-center justify-center hover:bg-primary hover:text-white transition-all" href="#">
+<span class="text-[10px] font-bold">GH</span>
+</a>
+</div>
+</div>
+<div class="md:col-span-2">
+<h6 class="text-[10px] font-bold uppercase tracking-widest mb-8 opacity-30">Menu</h6>
+<ul class="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest">
+<li><a class="hover:text-primary" href="#">Work</a></li>
+<li><a class="hover:text-primary" href="#">Process</a></li>
+<li><a class="hover:text-primary" href="#">Manifesto</a></li>
+<li><a class="hover:text-primary" href="#">Careers</a></li>
+</ul>
+</div>
+<div class="md:col-span-2">
+<h6 class="text-[10px] font-bold uppercase tracking-widest mb-8 opacity-30">Studio</h6>
+<ul class="flex flex-col gap-4 text-xs font-bold uppercase tracking-widest">
+<li><a class="hover:text-primary" href="#">Zürich</a></li>
+<li><a class="hover:text-primary" href="#">London</a></li>
+<li><a class="hover:text-primary" href="#">Tokyo</a></li>
+</ul>
+</div>
+<div class="md:col-span-3">
+<h6 class="text-[10px] font-bold uppercase tracking-widest mb-8 opacity-30">Let's build</h6>
+<p class="text-sm font-bold uppercase tracking-widest mb-6">hello@studio.v1</p>
+<button class="w-full border border-graphite dark:border-white py-4 text-xs font-bold uppercase tracking-[0.3em] hover:bg-primary hover:border-primary hover:text-white transition-all">
+                    Back to Top
+                </button>
+</div>
+</div>
+<div class="max-w-[1440px] mx-auto mt-24 pt-8 border-t border-graphite/5 flex flex-col md:flex-row justify-between items-center gap-6">
+<span class="text-[10px] font-bold opacity-30 tracking-widest uppercase">© 2024 Studio V1 — All Rights Reserved</span>
+<span class="text-[10px] font-bold opacity-30 tracking-widest uppercase">Variant 1: Kinetic Minimalist</span>
+</div>
+</footer>
+</main>
+<div class="fixed top-0 left-0 pointer-events-none z-[9999] opacity-0 md:opacity-100">
+<div class="size-4 border border-primary rounded-full transition-transform duration-300" id="cursor"></div>
+</div>
+<a class="fixed bottom-8 right-8 z-[100] group flex items-center justify-center bg-white dark:bg-graphite rounded-full shadow-2xl border border-graphite/10 dark:border-white/10 hover:border-primary dark:hover:border-primary transition-all duration-300 cursor-pointer" href="#top">
+<div class="relative flex items-center justify-center size-14">
+<svg class="absolute inset-0 size-full -rotate-90 transform p-1" viewBox="0 0 48 48">
+<circle class="text-graphite/10 dark:text-white/10" cx="24" cy="24" fill="none" r="22" stroke="currentColor" stroke-width="1"></circle>
+<circle class="progress-ring text-graphite dark:text-white" cx="24" cy="24" fill="none" r="22" stroke="currentColor" stroke-width="1"></circle>
+</svg>
+<span class="material-symbols-outlined text-graphite dark:text-white text-xl">arrow_upward</span>
+</div>
+</a>
+
+</body></html>
